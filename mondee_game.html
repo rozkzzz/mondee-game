@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>น้ำมนต์ MONDEE - เกมรับโชค</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;touch-action:none;}
+body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
+#game-wrap{position:relative;width:100vw;height:100vh;overflow:hidden;background:linear-gradient(180deg,#050215 0%,#0d0530 35%,#180a45 70%,#25104a 100%);}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate;}
+@keyframes twinkle{from{opacity:.1}to{opacity:.9}}
+#hud{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(0,0,0,0.55);border-bottom:1px solid rgba(255,215,0,0.35);backdrop-filter:blur(6px);}
+#logo-hud{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,215,0,0.4);}
+.hud-block{display:flex;flex-direction:column;align-items:center;}
+.hud-label{font-size:9px;color:rgba(255,215,0,0.65);letter-spacing:1px;text-transform:uppercase;}
+.hud-val{font-size:20px;font-weight:900;color:#ffd700;line-height:1;}
+#bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+#bar-bg{width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;border:1px solid rgba(255,215,0,0.25);}
+#bar-fill{height:100%;background:linear-gradient(90deg,#c8a800,#ffd700,#ff8c00);border-radius:8px;transition:width .3s;width:0%;}
+#hp-row{display:flex;gap:2px;font-size:17px;}
+#lvl-badge{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:20px;padding:2px 14px;font-size:10px;color:#ffd700;letter-spacing:1px;z-index:10;pointer-events:none;white-space:nowrap;}
+#combo{position:absolute;top:72px;right:12px;font-size:13px;font-weight:700;color:#ffd700;z-index:10;text-align:right;pointer-events:none;opacity:0;transition:opacity .3s;text-shadow:0 0 10px #ffd700;}
+#combo.show{opacity:1;}
+#canvas{position:absolute;left:0;width:100%;}
+#player{position:absolute;transform:translateX(-50%);z-index:5;transition:left .04s linear;cursor:none;}
+#player-img{width:72px;animation:float 2s ease-in-out infinite;filter:drop-shadow(0 4px 12px rgba(255,215,0,0.5));}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+#ground{position:absolute;bottom:0;left:0;right:0;z-index:4;}
+#ground-img{width:100%;height:62px;object-fit:cover;object-position:top;display:block;}
+#ground-hint{position:absolute;bottom:2px;width:100%;text-align:center;font-size:9px;color:rgba(255,215,0,0.35);letter-spacing:2px;pointer-events:none;}
+.fx{position:absolute;font-size:20px;font-weight:900;pointer-events:none;z-index:20;transform:translateX(-50%);animation:pop .85s ease-out forwards;text-shadow:0 0 8px currentColor;}
+@keyframes pop{0%{opacity:1;transform:translateX(-50%) scale(.5) translateY(0);}55%{opacity:1;transform:translateX(-50%) scale(1.4) translateY(-26px);}100%{opacity:0;transform:translateX(-50%) scale(1) translateY(-55px);}}
+@keyframes hitFlash{0%,100%{filter:brightness(1)}50%{filter:brightness(3) saturate(0)}}
+.hit{animation:hitFlash .3s ease;}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:12px;padding:24px;text-align:center;background:rgba(5,2,20,0.92);backdrop-filter:blur(10px);}
+.screen.hidden{display:none;}
+.s-logo{width:110px;border-radius:50%;box-shadow:0 0 30px rgba(255,215,0,0.5);margin-bottom:4px;}
+.s-title{font-size:30px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.5);line-height:1.15;}
+.s-sub{font-size:12px;color:rgba(255,255,255,0.6);max-width:290px;line-height:1.75;}
+.legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.65);background:rgba(255,255,255,0.06);border-radius:8px;padding:4px 8px;}
+.leg img{height:34px;width:auto;object-fit:contain;}
+.btn-gold{margin-top:4px;padding:12px 36px;background:linear-gradient(135deg,#c8a800,#ffd700,#ff8c00);color:#1a0800;border:none;border-radius:50px;font-family:'Kanit',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 22px rgba(255,160,0,.45);transition:transform .1s,box-shadow .1s;}
+.btn-gold:hover{transform:scale(1.05);}
+.btn-gold:active{transform:scale(.97);}
+.btn-out{padding:10px 28px;background:transparent;color:#ffd700;border:2px solid #ffd700;border-radius:50px;font-family:'Kanit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-out:hover{background:rgba(255,215,0,.08);}
+.score-big{font-size:62px;font-weight:900;color:#ffd700;line-height:1;text-shadow:0 0 28px rgba(255,215,0,.7);}
+.score-lbl{font-size:11px;color:rgba(255,215,0,.6);letter-spacing:2px;text-transform:uppercase;}
+.res-msg{font-size:13px;color:rgba(255,255,255,.65);max-width:270px;line-height:1.6;}
+#tap-l,#tap-r{position:absolute;bottom:62px;width:50%;z-index:6;opacity:0;}
+#tap-l{left:0;}#tap-r{right:0;}
+</style>
+</head>
+<body>
+<div id="game-wrap">
+  <div id="stars-wrap"></div>
+  <div id="hud">
+    <!-- 📌 รูปที่ 1: logo.png -->
+    <img id="logo-hud" src="images/logo.png" alt="mondee">
+    <div class="hud-block">
+      <div class="hud-label">โชคลาภ</div>
+      <div class="hud-val" id="score-display">0</div>
+    </div>
+    <div id="bar-wrap">
+      <div class="hud-label">LUCK METER</div>
+      <div id="bar-bg"><div id="bar-fill"></div></div>
+    </div>
+    <div class="hud-block">
+      <div class="hud-label">ชีวิต</div>
+      <div id="hp-row">❤️❤️❤️</div>
+    </div>
+  </div>
+  <div id="lvl-badge">⭐ ด่าน 1 — เริ่มต้น</div>
+  <div id="combo"></div>
+  <canvas id="canvas"></canvas>
+  <div id="player">
+    <!-- 📌 รูปที่ 2: player.png (พระ) -->
+    <img id="player-img" src="images/player.png" alt="player">
+  </div>
+  <div id="ground">
+    <!-- 📌 รูปที่ 3: ground.png (พื้นหิน) -->
+    <img id="ground-img" src="images/ground.png" alt="ground">
+    <div id="ground-hint">— เลื่อน mouse หรือแตะซ้าย/ขวา —</div>
+  </div>
+  <div id="tap-l"></div>
+  <div id="tap-r"></div>
+
+  <!-- หน้า Start -->
+  <div class="screen" id="start-screen">
+    <!-- 📌 รูปที่ 1: logo.png -->
+    <img class="s-logo" src="images/logo.png" alt="mondee">
+    <div class="s-title">น้ำมนต์ MONDEE<br>ตกจากฟ้า!</div>
+    <div class="legend">
+      <!-- 📌 รูปที่ 4: bottle_normal.png -->
+      <div class="leg"><img src="images/bottle_normal.png" alt=""> +50 โชค</div>
+      <!-- 📌 รูปที่ 5: bottle_gold.png -->
+      <div class="leg"><img src="images/bottle_gold.png" alt=""> +200 ✨RARE</div>
+      <!-- 📌 รูปที่ 6: skull.png -->
+      <div class="leg"><img src="images/skull.png" alt="" style="height:28px"> -ชีวิต</div>
+      <!-- 📌 รูปที่ 7: demon.png -->
+      <div class="leg"><img src="images/demon.png" alt="" style="height:30px"> -ชีวิต</div>
+    </div>
+    <div class="s-sub">มี 3 ชีวิต — รับน้ำมนต์ติดกันได้ COMBO bonus!<br>ยิ่งคะแนนสูง ด่านยิ่งยาก 5 ด่านรวม!</div>
+    <button class="btn-gold" onclick="startGame()">🙏 รับโชคได้เลย!</button>
+  </div>
+
+  <!-- หน้า Game Over -->
+  <div class="screen hidden" id="over-screen">
+    <!-- 📌 รูปที่ 1: logo.png -->
+    <img class="s-logo" src="images/logo.png" alt="mondee">
+    <div class="s-title">โชคหมดแล้ว!</div>
+    <div class="score-lbl">คะแนนโชคลาภสุดท้าย</div>
+    <div class="score-big" id="final-score">0</div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn-gold" onclick="startGame()">🔄 ลองใหม่</button>
+    <button class="btn-out" onclick="shareScore()">📤 แชร์คะแนน</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  📌 PATH รูปภาพทั้งหมด — แก้ตรงนี้ถ้า path เปลี่ยน
+//  วางรูปทั้งหมดไว้ในโฟลเดอร์ "images/" ข้างๆ ไฟล์นี้
+// ══════════════════════════════════════════════════════
+const SRC = {
+  bottle_normal: 'images/bottle_normal.png',
+  bottle_gold:   'images/bottle_gold.png',
+  skull:         'images/skull.png',
+  demon:         'images/demon.png',
+};
+
+const IMG = {};
+let loaded = 0;
+function loadImages(cb) {
+  const keys = Object.keys(SRC);
+  keys.forEach(k => {
+    const img = new Image();
+    img.onload = img.onerror = () => { if (++loaded === keys.length) cb(); };
+    img.src = SRC[k];
+    IMG[k] = img;
+  });
+}
+
+// ──────────── Config ────────────
+const ITEM_DEFS = [
+  { key:'bottle_normal', type:'good',    pts:50,  label:'+50 โชค!',   color:'#ffd700', w:34, h:64, weight:40 },
+  { key:'bottle_gold',   type:'special', pts:200, label:'+200 RARE!', color:'#ffee44', w:34, h:64, weight:8  },
+  { key:'skull',         type:'bad',     pts:0,   label:'-1 ชีวิต!',  color:'#ff4444', w:58, h:58, weight:22 },
+  { key:'demon',         type:'bad',     pts:0,   label:'-1 ชีวิต!',  color:'#dd22ff', w:58, h:66, weight:18 },
+];
+
+function weightedRandom() {
+  const total = ITEM_DEFS.reduce((s,d)=>s+d.weight,0);
+  let r = Math.random()*total;
+  for (const d of ITEM_DEFS){ r-=d.weight; if(r<=0) return d; }
+  return ITEM_DEFS[0];
+}
+
+const LEVELS = [
+  { min:0,    speed:2.2, rate:95, label:'⭐ ด่าน 1 — เริ่มต้น'  },
+  { min:500,  speed:3.0, rate:78, label:'⭐⭐ ด่าน 2 — เร็วขึ้น' },
+  { min:1500, speed:3.9, rate:62, label:'⭐⭐⭐ ด่าน 3 — ท้าทาย' },
+  { min:3000, speed:5.0, rate:46, label:'🔥 ด่าน 4 — อันตราย!'  },
+  { min:5000, speed:6.5, rate:34, label:'💀 ด่าน 5 — สุดท้า!'   },
+];
+function getLevel(s){ for(let i=LEVELS.length-1;i>=0;i--) if(s>=LEVELS[i].min) return LEVELS[i]; return LEVELS[0]; }
+
+// ──────────── DOM ────────────
+const wrap     = document.getElementById('game-wrap');
+const canvas   = document.getElementById('canvas');
+const ctx      = canvas.getContext('2d');
+const playerEl = document.getElementById('player');
+const scoreEl  = document.getElementById('score-display');
+const hpEl     = document.getElementById('hp-row');
+const barFill  = document.getElementById('bar-fill');
+const lvlBadge = document.getElementById('lvl-badge');
+const comboEl  = document.getElementById('combo');
+const startScr = document.getElementById('start-screen');
+const overScr  = document.getElementById('over-screen');
+const finalEl  = document.getElementById('final-score');
+const resMsgEl = document.getElementById('res-msg');
+
+// Stars
+(()=>{
+  const c=document.getElementById('stars-wrap');
+  for(let i=0;i<70;i++){
+    const el=document.createElement('div'); el.className='star';
+    const sz=Math.random()*2.5+0.5;
+    el.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${(Math.random()*3).toFixed(1)}s;animation-duration:${(1.5+Math.random()*2).toFixed(1)}s`;
+    c.appendChild(el);
+  }
+})();
+
+// ──────────── State ────────────
+let st=null, animId=null, spawnT=0, comboTimer=null;
+
+function resizeCanvas(){
+  const hudH=document.getElementById('hud').offsetHeight;
+  canvas.style.top=hudH+'px';
+  canvas.width=wrap.offsetWidth;
+  canvas.height=wrap.offsetHeight-hudH-62;
+}
+
+function startGame(){
+  startScr.classList.add('hidden');
+  overScr.classList.add('hidden');
+  if(animId) cancelAnimationFrame(animId);
+  resizeCanvas();
+  st={ px:wrap.offsetWidth/2, score:0, luck:0, hp:3, items:[], keys:{l:false,r:false}, combo:0, frame:0, running:true };
+  spawnT=0;
+  playerEl.style.bottom='66px';
+  updateHUD(); loop();
+}
+
+function updateHUD(){
+  scoreEl.textContent=st.score.toLocaleString();
+  hpEl.textContent='❤️'.repeat(Math.max(0,st.hp))+'🖤'.repeat(Math.max(0,3-st.hp));
+  barFill.style.width=Math.min(st.luck,100)+'%';
+  lvlBadge.textContent=getLevel(st.score).label;
+}
+
+function spawnItem(){
+  const def=weightedRandom();
+  const lv=getLevel(st.score);
+  st.items.push({...def, x:def.w/2+10+Math.random()*(canvas.width-def.w-20), y:-def.h, speed:lv.speed+Math.random()*1.2, rot:0, rotDir:Math.random()<0.5?1:-1});
+}
+
+function spawnFX(x,y,label,color){
+  const el=document.createElement('div'); el.className='fx';
+  el.style.cssText=`left:${x}px;top:${y}px;color:${color}`;
+  el.textContent=label; wrap.appendChild(el);
+  setTimeout(()=>el.remove(),850);
+}
+
+function showCombo(n){
+  clearTimeout(comboTimer);
+  if(n>=2){ comboEl.textContent=`🔥 COMBO x${n}!`; comboEl.classList.add('show'); comboTimer=setTimeout(()=>comboEl.classList.remove('show'),1600); }
+  else comboEl.classList.remove('show');
+}
+
+function endGame(){
+  st.running=false; cancelAnimationFrame(animId);
+  finalEl.textContent=st.score.toLocaleString();
+  const msgs=[[0,'😢 ยังต้องอาศัยน้ำมนต์อีกเยอะ...'],[500,'🙂 เริ่มมีโชคแล้ว! ลองอีกครั้ง'],[1500,'🙏 ดีมาก! น้ำมนต์ศักดิ์สิทธิ์อยู่กับท่าน'],[3000,'⭐ เก่งมาก! โชคลาภท่วมหัว!'],[5000,'🏆 ตำนาน! เทพเจ้าประทานพรแก่ท่านแล้ว!']];
+  let msg=msgs[0][1]; for(const[min,m]of msgs){ if(st.score>=min) msg=m; }
+  resMsgEl.textContent=msg; overScr.classList.remove('hidden');
+}
+
+function shareScore(){
+  const txt=`🍶 ฉันได้คะแนนโชคลาภ ${st.score.toLocaleString()} คะแนน\nจากเกมน้ำมนต์ MONDEE! มาลองดูบ้างสิ 🙏`;
+  if(navigator.share) navigator.share({title:'น้ำมนต์ MONDEE',text:txt});
+  else navigator.clipboard.writeText(txt).then(()=>alert('คัดลอกแล้ว!\n\n'+txt));
+}
+
+function loop(){
+  if(!st.running) return;
+  st.frame++;
+  const lv=getLevel(st.score);
+  spawnT++;
+  if(spawnT>=lv.rate){ spawnT=0; spawnItem(); if(st.score>=2000&&Math.random()<0.28) spawnItem(); if(st.score>=4000&&Math.random()<0.18) spawnItem(); }
+
+  const spd=7;
+  if(st.keys.l) st.px=Math.max(36,st.px-spd);
+  if(st.keys.r) st.px=Math.min(canvas.width-36,st.px+spd);
+  playerEl.style.left=st.px+'px';
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  st.items=st.items.filter(item=>{
+    item.y+=item.speed; item.rot+=0.03*item.rotDir;
+    // Shadow
+    ctx.save(); ctx.translate(item.x,item.y+item.h/2+3); ctx.scale(1,0.25);
+    ctx.beginPath(); ctx.arc(0,0,item.w/2,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.fill(); ctx.restore();
+    // Draw
+    ctx.save(); ctx.translate(item.x,item.y); ctx.rotate(item.rot);
+    const imgEl=IMG[item.key];
+    if(imgEl&&imgEl.complete&&imgEl.naturalWidth>0){
+      ctx.drawImage(imgEl,-item.w/2,-item.h/2,item.w,item.h);
+    } else {
+      ctx.font=`${item.w}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText({bottle_normal:'🍶',bottle_gold:'✨',skull:'💀',demon:'👿'}[item.key]||'❓',0,0);
+    }
+    ctx.restore();
+
+    // Catch
+    const groundTop=canvas.height-20;
+    if(Math.abs(item.x-st.px)<44&&Math.abs(item.y-groundTop)<50){
+      const fxY=wrap.offsetHeight-80;
+      if(item.type==='good'||item.type==='special'){
+        st.combo++;
+        const mul=st.combo>=3?Math.ceil(st.combo*0.6):1;
+        const bonus=item.pts*mul;
+        st.score+=bonus; st.luck=Math.min(100,st.luck+(item.type==='special'?25:10));
+        spawnFX(item.x,fxY,st.combo>=3?`+${bonus} COMBO x${st.combo}!`:item.label,item.color);
+        showCombo(st.combo);
+      } else {
+        st.combo=0; st.hp--; st.luck=Math.max(0,st.luck-18);
+        spawnFX(item.x,fxY,item.label,item.color);
+        comboEl.classList.remove('show');
+        playerEl.classList.remove('hit'); void playerEl.offsetWidth; playerEl.classList.add('hit');
+        if(st.hp<=0){ updateHUD(); endGame(); return false; }
+      }
+      updateHUD(); return false;
+    }
+    return item.y<canvas.height+item.h+10;
+  });
+
+  if(st.frame%130===0){ st.luck=Math.max(0,st.luck-1); barFill.style.width=st.luck+'%'; }
+  animId=requestAnimationFrame(loop);
+}
+
+// Controls
+document.addEventListener('keydown',e=>{ if(!st)return; if(e.key==='ArrowLeft'||e.key==='a') st.keys.l=true; if(e.key==='ArrowRight'||e.key==='d') st.keys.r=true; });
+document.addEventListener('keyup',  e=>{ if(!st)return; if(e.key==='ArrowLeft'||e.key==='a') st.keys.l=false; if(e.key==='ArrowRight'||e.key==='d') st.keys.r=false; });
+wrap.addEventListener('mousemove',e=>{ if(!st?.running)return; const r=wrap.getBoundingClientRect(); st.px=Math.max(36,Math.min(canvas.width-36,e.clientX-r.left)); });
+wrap.addEventListener('touchmove',e=>{ e.preventDefault(); if(!st?.running)return; const r=wrap.getBoundingClientRect(); st.px=Math.max(36,Math.min(canvas.width-36,e.touches[0].clientX-r.left)); },{passive:false});
+const tapL=document.getElementById('tap-l'), tapR=document.getElementById('tap-r');
+tapL.addEventListener('touchstart',e=>{e.preventDefault();if(st)st.keys.l=true; },{passive:false});
+tapL.addEventListener('touchend',  e=>{e.preventDefault();if(st)st.keys.l=false;},{passive:false});
+tapR.addEventListener('touchstart',e=>{e.preventDefault();if(st)st.keys.r=true; },{passive:false});
+tapR.addEventListener('touchend',  e=>{e.preventDefault();if(st)st.keys.r=false;},{passive:false});
+
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+loadImages(()=>console.log('✅ Images loaded'));
+</script>
+</body>
+</html>
