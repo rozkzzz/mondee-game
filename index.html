@@ -9,10 +9,14 @@
 *{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;}
 html,body{width:100%;height:100%;overflow:hidden;touch-action:none;}
 body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
-#game-wrap{position:relative;width:100vw;height:100vh;overflow:hidden;background:linear-gradient(180deg,#050215 0%,#0d0530 35%,#180a45 70%,#25104a 100%);}
-.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate;}
+#game-wrap{position:relative;width:100vw;height:100vh;overflow:hidden;background:#050215;}
+/* พื้นหลังวัด */
+#bg-temple{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:0;opacity:0.85;}
+/* overlay gradient ให้เนื้อหาอ่านได้ชัด */
+#bg-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(5,2,21,0.35) 0%,rgba(5,2,21,0.15) 50%,rgba(5,2,21,0.55) 100%);}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate;z-index:2;}
 @keyframes twinkle{from{opacity:.1}to{opacity:.9}}
-#hud{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(0,0,0,0.55);border-bottom:1px solid rgba(255,215,0,0.35);backdrop-filter:blur(6px);}
+#hud{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(0,0,0,0.55);border-bottom:1px solid rgba(255,215,0,0.35);backdrop-filter:blur(6px);}
 #logo-hud{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,215,0,0.4);}
 .hud-block{display:flex;flex-direction:column;align-items:center;}
 .hud-label{font-size:9px;color:rgba(255,215,0,0.65);letter-spacing:1px;text-transform:uppercase;}
@@ -21,15 +25,15 @@ body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
 #bar-bg{width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;border:1px solid rgba(255,215,0,0.25);}
 #bar-fill{height:100%;background:linear-gradient(90deg,#c8a800,#ffd700,#ff8c00);border-radius:8px;transition:width .3s;width:0%;}
 #hp-row{display:flex;gap:2px;font-size:17px;}
-#lvl-badge{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:20px;padding:2px 14px;font-size:10px;color:#ffd700;letter-spacing:1px;z-index:10;pointer-events:none;white-space:nowrap;}
-#combo{position:absolute;top:72px;right:12px;font-size:13px;font-weight:700;color:#ffd700;z-index:10;text-align:right;pointer-events:none;opacity:0;transition:opacity .3s;text-shadow:0 0 10px #ffd700;}
+#lvl-badge{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:20px;padding:2px 14px;font-size:10px;color:#ffd700;letter-spacing:1px;z-index:20;pointer-events:none;white-space:nowrap;}
+#combo{position:absolute;top:72px;right:12px;font-size:13px;font-weight:700;color:#ffd700;z-index:20;text-align:right;pointer-events:none;opacity:0;transition:opacity .3s;text-shadow:0 0 10px #ffd700;}
 #combo.show{opacity:1;}
-#canvas{position:absolute;left:0;width:100%;}
-#player{position:absolute;transform:translateX(-50%);z-index:5;transition:left .04s linear;cursor:none;}
+#canvas{position:absolute;left:0;width:100%;z-index:3;}
+#player{position:absolute;transform:translateX(-50%);z-index:10;transition:left .04s linear;cursor:none;}
 #player-img{width:72px;animation:float 2s ease-in-out infinite;filter:drop-shadow(0 4px 12px rgba(255,215,0,0.5));}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-#ground{position:absolute;bottom:0;left:0;right:0;z-index:4;}
-#ground-img{width:100%;height:62px;object-fit:cover;object-position:top;display:block;}
+#ground{position:absolute;bottom:0;left:0;right:0;z-index:9;}
+#ground-img{width:100%;height:90px;object-fit:cover;object-position:top;display:block;}
 #ground-hint{position:absolute;bottom:2px;width:100%;text-align:center;font-size:9px;color:rgba(255,215,0,0.35);letter-spacing:2px;pointer-events:none;}
 .fx{position:absolute;font-size:20px;font-weight:900;pointer-events:none;z-index:20;transform:translateX(-50%);animation:pop .85s ease-out forwards;text-shadow:0 0 8px currentColor;}
 @keyframes pop{0%{opacity:1;transform:translateX(-50%) scale(.5) translateY(0);}55%{opacity:1;transform:translateX(-50%) scale(1.4) translateY(-26px);}100%{opacity:0;transform:translateX(-50%) scale(1) translateY(-55px);}}
@@ -37,6 +41,34 @@ body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
 .hit{animation:hitFlash .3s ease;}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:12px;padding:24px;text-align:center;background:rgba(5,2,20,0.92);backdrop-filter:blur(10px);}
 .screen.hidden{display:none;}
+/* หน้า endgame ใช้ภาพเต็ม ไม่มี overlay */
+#over-screen{background:none;backdrop-filter:none;padding:0;}
+#over-screen .endgame-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
+#over-screen .endgame-content{position:relative;z-index:2;width:100%;height:100%;}
+/* แต้ม LUCK มุมขวาบน ตรงตำแหน่งในภาพ */
+#over-screen .luck-score-box{
+  position:absolute;
+  top:3.5%;left:2%;
+  display:flex;flex-direction:column;align-items:flex-start;
+  gap:0px;
+}
+#over-screen .luck-label{
+  font-size:clamp(10px,2.2vw,18px);font-weight:700;
+  color:#c8a800;letter-spacing:1px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  font-family:'Kanit',sans-serif;
+}
+#over-screen .luck-number{
+  font-size:clamp(22px,5vw,52px);font-weight:900;
+  color:#ffd700;line-height:1;
+  text-shadow:0 0 20px rgba(255,215,0,0.9),0 2px 6px rgba(0,0,0,0.9);
+  font-family:'Kanit',sans-serif;
+}
+/* ปุ่มล่าง */
+#over-screen .endgame-btns{
+  position:absolute;bottom:8%;left:50%;transform:translateX(-50%);
+  display:flex;gap:16px;
+}
 .s-logo{width:110px;border-radius:50%;box-shadow:0 0 30px rgba(255,215,0,0.5);margin-bottom:4px;}
 .s-title{font-size:30px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.5);line-height:1.15;}
 .s-sub{font-size:12px;color:rgba(255,255,255,0.6);max-width:290px;line-height:1.75;}
@@ -51,12 +83,15 @@ body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
 .score-big{font-size:62px;font-weight:900;color:#ffd700;line-height:1;text-shadow:0 0 28px rgba(255,215,0,.7);}
 .score-lbl{font-size:11px;color:rgba(255,215,0,.6);letter-spacing:2px;text-transform:uppercase;}
 .res-msg{font-size:13px;color:rgba(255,255,255,.65);max-width:270px;line-height:1.6;}
-#tap-l,#tap-r{position:absolute;bottom:62px;width:50%;z-index:6;opacity:0;}
+#tap-l,#tap-r{position:absolute;bottom:90px;width:50%;z-index:6;opacity:0;}
 #tap-l{left:0;}#tap-r{right:0;}
 </style>
 </head>
 <body>
 <div id="game-wrap">
+  <!-- พื้นหลังวัด -->
+  <img id="bg-temple" src="images/Thai_temple.jpeg" alt="">
+  <div id="bg-overlay"></div>
   <div id="stars-wrap"></div>
   <div id="hud">
     <!-- 📌 รูปที่ 1: logo.png -->
@@ -110,14 +145,20 @@ body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
 
   <!-- หน้า Game Over -->
   <div class="screen hidden" id="over-screen">
-    <!-- 📌 รูปที่ 1: logo.png -->
-    <img class="s-logo" src="images/logo.png" alt="mondee">
-    <div class="s-title">โชคหมดแล้ว!</div>
-    <div class="score-lbl">คะแนนโชคลาภสุดท้าย</div>
-    <div class="score-big" id="final-score">0</div>
-    <div class="res-msg" id="res-msg"></div>
-    <button class="btn-gold" onclick="startGame()">🔄 ลองใหม่</button>
-    <button class="btn-out" onclick="shareScore()">📤 แชร์คะแนน</button>
+    <!-- ภาพพื้นหลัง endgame เต็มหน้า ไม่ตัด ไม่ resize -->
+    <img class="endgame-bg" src="images/endgame.png" alt="endgame">
+    <div class="endgame-content">
+      <!-- แต้ม LUCK มุมบนซ้าย ตรงกล่องในภาพ -->
+      <div class="luck-score-box">
+        <div class="luck-label">แต้ม LUCK :</div>
+        <div class="luck-number" id="final-score">0</div>
+      </div>
+      <!-- ปุ่มด้านล่าง -->
+      <div class="endgame-btns">
+        <button class="btn-gold" onclick="startGame()">เริ่มเสริมดวง</button>
+        <button class="btn-out" onclick="shareScore()">แชร์คะแนน</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -202,7 +243,7 @@ function resizeCanvas(){
   const hudH=document.getElementById('hud').offsetHeight;
   canvas.style.top=hudH+'px';
   canvas.width=wrap.offsetWidth;
-  canvas.height=wrap.offsetHeight-hudH-62;
+  canvas.height=wrap.offsetHeight-hudH-90;
 }
 
 function startGame(){
@@ -212,7 +253,7 @@ function startGame(){
   resizeCanvas();
   st={ px:wrap.offsetWidth/2, score:0, luck:0, hp:3, items:[], keys:{l:false,r:false}, combo:0, frame:0, running:true };
   spawnT=0;
-  playerEl.style.bottom='66px';
+  playerEl.style.bottom='94px';
   updateHUD(); loop();
 }
 
@@ -245,9 +286,7 @@ function showCombo(n){
 function endGame(){
   st.running=false; cancelAnimationFrame(animId);
   finalEl.textContent=st.score.toLocaleString();
-  const msgs=[[0,'😢 ยังต้องอาศัยน้ำมนต์อีกเยอะ...'],[500,'🙂 เริ่มมีโชคแล้ว! ลองอีกครั้ง'],[1500,'🙏 ดีมาก! น้ำมนต์ศักดิ์สิทธิ์อยู่กับท่าน'],[3000,'⭐ เก่งมาก! โชคลาภท่วมหัว!'],[5000,'🏆 ตำนาน! เทพเจ้าประทานพรแก่ท่านแล้ว!']];
-  let msg=msgs[0][1]; for(const[min,m]of msgs){ if(st.score>=min) msg=m; }
-  resMsgEl.textContent=msg; overScr.classList.remove('hidden');
+  overScr.classList.remove('hidden');
 }
 
 function shareScore(){
