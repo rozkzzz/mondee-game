@@ -41,34 +41,7 @@ body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
 .hit{animation:hitFlash .3s ease;}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:12px;padding:24px;text-align:center;background:rgba(5,2,20,0.92);backdrop-filter:blur(10px);}
 .screen.hidden{display:none;}
-/* หน้า endgame ใช้ภาพเต็ม ไม่มี overlay */
-#over-screen{background:none;backdrop-filter:none;padding:0;}
-#over-screen .endgame-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
-#over-screen .endgame-content{position:relative;z-index:2;width:100%;height:100%;}
-/* แต้ม LUCK มุมขวาบน ตรงตำแหน่งในภาพ */
-#over-screen .luck-score-box{
-  position:absolute;
-  top:3.5%;left:2%;
-  display:flex;flex-direction:column;align-items:flex-start;
-  gap:0px;
-}
-#over-screen .luck-label{
-  font-size:clamp(10px,2.2vw,18px);font-weight:700;
-  color:#c8a800;letter-spacing:1px;
-  text-shadow:0 1px 4px rgba(0,0,0,0.8);
-  font-family:'Kanit',sans-serif;
-}
-#over-screen .luck-number{
-  font-size:clamp(22px,5vw,52px);font-weight:900;
-  color:#ffd700;line-height:1;
-  text-shadow:0 0 20px rgba(255,215,0,0.9),0 2px 6px rgba(0,0,0,0.9);
-  font-family:'Kanit',sans-serif;
-}
-/* ปุ่มล่าง */
-#over-screen .endgame-btns{
-  position:absolute;bottom:8%;left:50%;transform:translateX(-50%);
-  display:flex;gap:16px;
-}
+
 .s-logo{width:110px;border-radius:50%;box-shadow:0 0 30px rgba(255,215,0,0.5);margin-bottom:4px;}
 .s-title{font-size:30px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.5);line-height:1.15;}
 .s-sub{font-size:12px;color:rgba(255,255,255,0.6);max-width:290px;line-height:1.75;}
@@ -145,20 +118,13 @@ body{font-family:'Kanit',sans-serif;background:#0a0522;color:#fff;}
 
   <!-- หน้า Game Over -->
   <div class="screen hidden" id="over-screen">
-    <!-- ภาพพื้นหลัง endgame เต็มหน้า ไม่ตัด ไม่ resize -->
-    <img class="endgame-bg" src="images/endgame.png" alt="endgame">
-    <div class="endgame-content">
-      <!-- แต้ม LUCK มุมบนซ้าย ตรงกล่องในภาพ -->
-      <div class="luck-score-box">
-        <div class="luck-label">แต้ม LUCK :</div>
-        <div class="luck-number" id="final-score">0</div>
-      </div>
-      <!-- ปุ่มด้านล่าง -->
-      <div class="endgame-btns">
-        <button class="btn-gold" onclick="startGame()">เริ่มเสริมดวง</button>
-        <button class="btn-out" onclick="shareScore()">แชร์คะแนน</button>
-      </div>
-    </div>
+    <img class="s-logo" src="images/logo.png" alt="mondee">
+    <div class="s-title">โชคหมดแล้ว!</div>
+    <div class="score-lbl">คะแนนโชคลาภสุดท้าย</div>
+    <div class="score-big" id="final-score">0</div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn-gold" onclick="startGame()">🔄 ลองใหม่</button>
+    <button class="btn-out" onclick="shareScore()">📤 แชร์คะแนน</button>
   </div>
 </div>
 
@@ -286,6 +252,9 @@ function showCombo(n){
 function endGame(){
   st.running=false; cancelAnimationFrame(animId);
   finalEl.textContent=st.score.toLocaleString();
+  const msgs=[[0,'😢 ยังต้องอาศัยน้ำมนต์อีกเยอะ...'],[500,'🙂 เริ่มมีโชคแล้ว! ลองอีกครั้ง'],[1500,'🙏 ดีมาก! น้ำมนต์ศักดิ์สิทธิ์อยู่กับท่าน'],[3000,'⭐ เก่งมาก! โชคลาภท่วมหัว!'],[5000,'🏆 ตำนาน! เทพเจ้าประทานพรแก่ท่านแล้ว!']];
+  let msg=msgs[0][1]; for(const[min,m]of msgs){ if(st.score>=min) msg=m; }
+  document.getElementById('res-msg').textContent=msg;
   overScr.classList.remove('hidden');
 }
 
